@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { Observable } from 'rxjs';
-import { debounceTime, distinctUntilChanged, switchMap, startWith } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, switchMap, startWith, map } from 'rxjs/operators';
 import { CourseService, Course } from './course';
 
 @Component({
@@ -21,6 +21,7 @@ export class CoursesPage implements OnInit {
   ngOnInit(): void {
     this.courses$ = this.searchControl.valueChanges.pipe(
       startWith(''),
+      map(query => query ? query.trim() : ''),
       debounceTime(400),
       distinctUntilChanged(),
       switchMap(query => this.courseService.searchCourses(query || ''))
