@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormControl } from '@angular/forms';
+import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap, startWith, map } from 'rxjs/operators';
 import { CourseService, Course } from './course';
@@ -16,6 +16,12 @@ export class CoursesPage implements OnInit {
   searchControl = new FormControl('');
   courses$!: Observable<Course[]>;
 
+  courseForm = new FormGroup({
+    title: new FormControl('', Validators.required),
+    category: new FormControl('', Validators.required),
+    duration: new FormControl('', Validators.required)
+  });
+
   constructor(private courseService: CourseService) { }
 
   ngOnInit(): void {
@@ -24,7 +30,19 @@ export class CoursesPage implements OnInit {
       map(query => query ? query.trim() : ''),
       debounceTime(400),
       distinctUntilChanged(),
-      switchMap(query => this.courseService.searchCourses(query || ''))
+      switchMap(query => this.courseService.searchCourses(query))
     );
+  }
+
+  onAddCourse(): void {
+    if (this.courseForm.valid) {
+      const { title, category, duration } = this.courseForm.value;
+      this.courseService.addCourse(title!, category!, duration!);
+      this.courseForm.reset();
+    }
+  }
+
+  onDeleteCourse(id: number): void {
+    this.courseService.deleteCourse(id);
   }
 }
