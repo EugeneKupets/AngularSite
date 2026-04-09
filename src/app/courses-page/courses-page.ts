@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
-import { Observable } from 'rxjs';
+import { Observable, combineLatest } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap, startWith, map } from 'rxjs/operators';
 import { CourseService, Course } from './course';
 
@@ -14,7 +14,10 @@ import { CourseService, Course } from './course';
 })
 export class CoursesPage implements OnInit {
   searchControl = new FormControl('');
+  categoryControl = new FormControl('All');
+
   courses$!: Observable<Course[]>;
+  categories$!: Observable<string[]>;
 
   courseForm = new FormGroup({
     title: new FormControl('', Validators.required),
@@ -25,12 +28,23 @@ export class CoursesPage implements OnInit {
   constructor(private courseService: CourseService) { }
 
   ngOnInit(): void {
-    this.courses$ = this.searchControl.valueChanges.pipe(
+    this.categories$ = this.courseService.categories$;
+
+    const search$ = this.searchControl.valueChanges.pipe(
       startWith(''),
       map(query => query ? query.trim() : ''),
       debounceTime(400),
-      distinctUntilChanged(),
-      switchMap(query => this.courseService.searchCourses(query))
+      distinctUntilChanged()
+    );
+
+    const category$ = this.categoryControl.valueChanges.pipe(
+      startWith('All')
+    );
+
+    this.courses$ = combineLatest([search$, category$]).pipe(
+      switchMap(([query, category]) =>
+        this.courseService.searchCourses(query, category || 'All')
+      )
     );
   }
 
@@ -39,6 +53,8 @@ export class CoursesPage implements OnInit {
       const { title, category, duration } = this.courseForm.value;
       this.courseService.addCourse(title!, category!, duration!);
       this.courseForm.reset();
+
+      this.categoryControl.setValue('All');
     }
   }
 

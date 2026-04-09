@@ -1,5 +1,5 @@
 <div class="courses-container">
-    <h2>Керування курсами</h2>
+    <h2>Комбінований пошук курсів</h2>
 
     <form class="add-course-form" [formGroup]="courseForm" (ngSubmit)="onAddCourse()">
         <h3>Додати новий курс</h3>
@@ -13,9 +13,21 @@
 
     <hr class="divider">
 
-    <input type="text" [formControl]="searchControl" placeholder="Пошук курсів за назвою...">
+    <div class="filters-container">
+        <input type="text" [formControl]="searchControl" placeholder="Пошук курсів за назвою..." class="search-input">
+
+        <select [formControl]="categoryControl" class="category-select">
+            <option *ngFor="let cat of (categories$ | async)" [value]="cat">
+                {{ cat === 'All' ? 'Всі категорії' : cat }}
+            </option>
+        </select>
+    </div>
 
     <ul *ngIf="courses$ | async as courses">
+        <div *ngIf="courses.length === 0" class="no-results">
+            Курсів не знайдено 😕
+        </div>
+
         <li *ngFor="let course of courses">
             <div class="course-info">
                 <strong>{{ course.title }}</strong>
