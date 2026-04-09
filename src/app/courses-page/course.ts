@@ -18,7 +18,8 @@ export class CourseService {
     { id: 2, title: 'RxJS Masterclass', category: 'Frontend', duration: '3 години' },
     { id: 3, title: 'Node.js Backend', category: 'Backend', duration: '8 годин' },
     { id: 4, title: 'PostgreSQL for Beginners', category: 'Database', duration: '4 години' },
-    { id: 5, title: 'Kotlin Android Dev', category: 'Mobile', duration: '10 годин' }
+    { id: 5, title: 'Kotlin Android Dev', category: 'Mobile', duration: '10 годин' },
+    { id: 6, title: 'UI/UX Fundamentals', category: 'Design', duration: '6 годин' }
   ];
 
   private coursesSubject = new BehaviorSubject<Course[]>(this.initialCourses);
@@ -27,11 +28,24 @@ export class CourseService {
     return this.coursesSubject.asObservable();
   }
 
-  searchCourses(query: string): Observable<Course[]> {
+  get categories$(): Observable<string[]> {
     return this.courses$.pipe(
-      map(courses => courses.filter(c =>
-        c.title.toLowerCase().includes(query.toLowerCase())
-      )),
+      map(courses => {
+        const allCategories = courses.map(c => c.category);
+        const uniqueCategories = [...new Set(allCategories)];
+        return ['All', ...uniqueCategories];
+      })
+    );
+  }
+
+  searchCourses(query: string, categoryFilter: string): Observable<Course[]> {
+    return this.courses$.pipe(
+      map(courses => courses.filter(c => {
+        const matchesTitle = c.title.toLowerCase().includes(query.toLowerCase());
+        const matchesCategory = categoryFilter === 'All' ? true : c.category === categoryFilter;
+
+        return matchesTitle && matchesCategory;
+      })),
       delay(300)
     );
   }
@@ -39,16 +53,13 @@ export class CourseService {
   addCourse(title: string, category: string, duration: string): void {
     const currentCourses = this.coursesSubject.getValue();
     const newId = currentCourses.length > 0 ? Math.max(...currentCourses.map(c => c.id)) + 1 : 1;
-
     const newCourse: Course = { id: newId, title, category, duration };
-
     this.coursesSubject.next([...currentCourses, newCourse]);
   }
 
   deleteCourse(id: number): void {
     const currentCourses = this.coursesSubject.getValue();
     const updatedCourses = currentCourses.filter(course => course.id !== id);
-
     this.coursesSubject.next(updatedCourses);
   }
 }
