@@ -1,0 +1,35 @@
+<div class="courses-container">
+  <h2>HTTP Courses List</h2>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="state-container loading">
+    <div class="spinner"></div>
+    <p>Loading courses from server...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error" class="state-container error">
+    <div class="error-icon">⚠️</div>
+    <p>{{ error }}</p>
+    <button (click)="fetchCourses()" class="retry-btn">Retry</button>
+  </div>
+
+  <!-- Success State -->
+  <div *ngIf="!loading && !error">
+    <div *ngIf="courses.length === 0" class="no-results">
+      No courses available.
+    </div>
+
+    <ul>
+      <li *ngFor="let course of courses">
+        <div class="course-info">
+          <strong>{{ course.title }}</strong>
+          <span>{{ course.category }}</span>
+        </div>
+        <div class="course-actions">
+          <small>Duration: {{ course.duration }} hours</small>
+        </div>
+      </li>
+    </ul>
+  </div>
+</div>
