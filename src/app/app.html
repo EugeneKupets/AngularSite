@@ -1,1 +1,19 @@
-<app-courses-page></app-courses-page>
+<div style="max-width: 700px; margin: 20px auto; display: flex; gap: 20px; justify-content: center;">
+  <a routerLink="/local" routerLinkActive="active-link" style="padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; color: #374151; background-color: #f3f4f6; transition: all 0.2s;">Local Data</a>
+  <a routerLink="/http" routerLinkActive="active-link" style="padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; color: #374151; background-color: #f3f4f6; transition: all 0.2s;">HTTP Data</a>
+</div>
+
+<style>
+  .active-link {
+    background-color: #3b82f6 !important;
+    color: white !important;
+  }
+  @media (prefers-color-scheme: dark) {
+    a:not(.active-link) {
+      background-color: #374151 !important;
+      color: #f9fafb !important;
+    }
+  }
+</style>
+
+<router-outlet></router-outlet>
